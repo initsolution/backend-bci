@@ -279,7 +279,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
 
     let dataTenant = ''
     if (task.site.tenants != '') {
-      var kodeTenant = task.site.tenants.split(',')
+      var kodeTenant = task.site.tenants.split(';')
       if (kodeTenant.length > 0) {
         for (let j = 0; j < kodeTenant.length; j++) {
           dataTenant += (await this.tenantService.getTenantByKode(kodeTenant[j])).name

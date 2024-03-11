@@ -12,7 +12,7 @@ export class Asset extends BasicEntity {
     category ?: string
 
     @IsOptional({ groups: [UPDATE, CREATE] })
-    @Column('varchar', {nullable: false, length : 200})
+    @Column('varchar', {nullable: true, length : 400})
     description ?: string
 
     @IsOptional({ groups: [UPDATE, CREATE] })
@@ -24,7 +24,7 @@ export class Asset extends BasicEntity {
     isPassed ?: boolean
 
     @IsOptional({ groups: [UPDATE, CREATE] })
-    @Column('varchar', {nullable: true, length : 200})
+    @Column('varchar', {nullable: true, length : 400})
     note ?: string
 
     @IsOptional({ groups: [UPDATE, CREATE] })
