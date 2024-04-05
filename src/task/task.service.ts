@@ -360,7 +360,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
                 [{ text: 'TOWER HEIGHT',  style: 'header' }, {text: ':', style: 'header'},{ text: task.site.towerHeight + 'M', style: 'header' }],
                 [{ text: 'FABRICATOR', style: 'header' }, {text: ':', style: 'header'}, { text: task.site.fabricator, style: 'header' }],
                 [{ text: 'OPERATOR',  style: 'header' }, {text: ':', style: 'header'}, { text: dataTenant,  style: 'header' }],
-                [{ text: 'CREATED DATE',  style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.created_at).format('DD-MM-YYYY'),  style: 'header' }],
+                [{ text: 'SUBMIT DATE',  style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.submitedDate).format('DD-MM-YYYY'),  style: 'header' }],
                 [{ text: 'ACCEPTANCE DATE',  style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.verifiedDate).format('DD-MM-YYYY'),  style: 'header' }],
                 [{ text: 'DUE DATE', style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.dueDate).format('DD-MM-YYYY'),  style: 'header' }],
                 [{ text: 'PIC NAME',  style: 'header' }, {text: ':', style: 'header'},{ text: task.makerEmployee.name,  style: 'header' }],
