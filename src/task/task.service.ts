@@ -260,7 +260,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
       // .orderBy({'asset.orderIndex' : 'ASC', 'asset.id' : 'ASC'})
       .getMany()
     // const pathLocal = '/home/project/balcom/backend/src/task'
-    const pathLocal = '/home/project/balcom/backend/assets'
+    const pathLocal = './assets'
     getCategoryAsset = getCategoryAsset.sort((a, b) => a.orderIndex - b.orderIndex)
     // console.log(getCategoryAsset)
     const path_fonts = join(pathLocal, 'fonts')
