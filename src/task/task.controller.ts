@@ -256,6 +256,11 @@ export class TaskController implements CrudController<Task> {
   async customGetAll(@Req() req: CrudRequest) {
     return await this.base.getManyBase(req);
   }
+  
+  @Get('coba')
+  async coba() {
+    return await this.service.cobaLagi()
+  }
 
   // @Override('updateOneBase')
   // async updateTask(@Req() req: CrudRequest, @Body() data : Task){

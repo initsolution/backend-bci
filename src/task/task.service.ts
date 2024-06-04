@@ -20,7 +20,7 @@ import { ReportregulertorqueService } from 'src/reportregulertorque/reportregule
 import { ReportregulerverticalityService } from 'src/reportregulerverticality/reportregulerverticality.service';
 
 @Injectable()
-export class TaskService extends TypeOrmCrudService<Task>{
+export class TaskService extends TypeOrmCrudService<Task> {
   constructor(
     @InjectRepository(Task) repo,
     @InjectRepository(Asset)
@@ -112,18 +112,18 @@ export class TaskService extends TypeOrmCrudService<Task>{
     })
   }
 
-  async updateStatus(){
-   const dateNow = moment().format('YYYY-MM-DD') 
-   var fullTask: Task[] = []
-   await this.repo.createQueryBuilder('task')
-    .where('task.status = :status', { status : 'todo'})
-    .andWhere('task.dueDate < :dateNow', {dateNow : dateNow})
-    .getMany()
-    .then((dataJadi) => {
-      fullTask = dataJadi
-    })
+  async updateStatus() {
+    const dateNow = moment().format('YYYY-MM-DD')
+    var fullTask: Task[] = []
+    await this.repo.createQueryBuilder('task')
+      .where('task.status = :status', { status: 'todo' })
+      .andWhere('task.dueDate < :dateNow', { dateNow: dateNow })
+      .getMany()
+      .then((dataJadi) => {
+        fullTask = dataJadi
+      })
 
-    for(let i =0; i< fullTask.length; i++){
+    for (let i = 0; i < fullTask.length; i++) {
       let updateTask = fullTask[i]
       updateTask.status = 'expired'
       await this.repo.update(updateTask.id, updateTask)
@@ -136,15 +136,18 @@ export class TaskService extends TypeOrmCrudService<Task>{
     const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
     var fullTask: Task[] = []
     await this.repo.createQueryBuilder('task')
-      // .select('task.*')
+      .select('task')
       // .distinctOn(['task.site.id'])
       .where('task.type = :type', { type: 'Preventive' })
+      .distinctOn(['task.site'])
       .leftJoinAndSelect('task.site', 'site')
       .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
       .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
 
       .orderBy({
-        'task.created_at': 'DESC'
+        'task.site': 'ASC',
+        'task.created_at': 'DESC',
+
       })
       .getMany().then((dataJadi) => {
         fullTask = dataJadi
@@ -192,6 +195,48 @@ export class TaskService extends TypeOrmCrudService<Task>{
     }
     const createNewTask = this.repo.create(newTaskJoin)
     return this.repo.save(createNewTask)
+  }
+
+  async cobaLagi() {
+    const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
+    const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
+    var fullTask: Task[] = []
+    await this.repo.createQueryBuilder('task')
+      .select('task')
+      // .distinctOn(['task.site.id'])
+      .where('task.type = :type', { type: 'Preventive' })
+      .distinctOn(['task.site'])
+      .leftJoinAndSelect('task.site', 'site')
+      .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
+      .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
+
+      .orderBy({
+        'task.site': 'ASC',
+        'task.created_at': 'DESC',
+
+      })
+      .getMany().then((dataJadi) => {
+        fullTask = dataJadi
+
+      })
+
+    // await this.repo.createQueryBuilder('task')
+    //   // .select('task.*')
+    //   // .distinctOn(['task.site.id'])
+    //   .where('task.type = :type', { type: 'Preventive' })
+    //   .leftJoinAndSelect('task.site', 'site')
+    //   .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
+    //   .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
+
+    //   .orderBy({
+    //     'task.created_at': 'DESC'
+    //   })
+    //   .getMany().then((dataJadi) => {
+    //     fullTask = dataJadi
+
+    //   })
+
+    return fullTask
   }
 
 
@@ -306,47 +351,47 @@ export class TaskService extends TypeOrmCrudService<Task>{
     )
     dataRender.push([
       {
-        columns : [
-          {width: '*', text : '\n\n\n\n'},
+        columns: [
+          { width: '*', text: '\n\n\n\n' },
         ]
       }
     ])
     dataRender.push([
       {
-        columns : [
-          {width: '*', text : ''},
-          {width: 'auto', text : task.type.toLocaleLowerCase() == 'preventive' ? 'REPORT PREVENTIVE MAINTENANCE' : 'REPORT REGULER MINI TII', style: 'headerTitle'},
-          {width: '*', text : ''},
+        columns: [
+          { width: '*', text: '' },
+          { width: 'auto', text: task.type.toLocaleLowerCase() == 'preventive' ? 'REPORT PREVENTIVE MAINTENANCE' : 'REPORT REGULER MINI TII', style: 'headerTitle' },
+          { width: '*', text: '' },
         ]
       }
     ])
     dataRender.push([
       {
-        columns : [
-          {width: '*', text : '\n\n'},
+        columns: [
+          { width: '*', text: '\n\n' },
         ]
       }
     ])
     dataRender.push([
       {
-        columns : [
-          {width: '*', text : ''},
-          {width: 'auto', text : moment(task.submitedDate).format('MMMM YYYY') , style: 'headerTitle'},
-          {width: '*', text : ''},
+        columns: [
+          { width: '*', text: '' },
+          { width: 'auto', text: moment(task.submitedDate).format('MMMM YYYY'), style: 'headerTitle' },
+          { width: '*', text: '' },
         ]
       }
     ])
     dataRender.push([
       {
-        columns : [
-          {width: '*', text : '\n\n\n\n\n'},
+        columns: [
+          { width: '*', text: '\n\n\n\n\n' },
         ]
       }
     ])
     dataRender.push([
 
       {
-        columns : [
+        columns: [
           { width: '*', text: '' },
           {
             width: 'auto',
@@ -354,24 +399,24 @@ export class TaskService extends TypeOrmCrudService<Task>{
             layout: 'noBorders',
             table: {
               body: [
-                [{ text: 'SITE ID',  style: 'header' },{text: ':', style: 'header'}, { text: task.site.id,  style: 'header' }],
-                [{ text: 'SITE NAME', style: 'header' }, {text: ':', style: 'header'},{ text: task.site.name,  style: 'header' }],
-                [{ text: 'AREA / REGION',  style: 'header' }, {text: ':', style: 'header'},{ text: task.site.region,  style: 'header' }],
-                [{ text: 'TOWER HEIGHT',  style: 'header' }, {text: ':', style: 'header'},{ text: task.site.towerHeight + 'M', style: 'header' }],
-                [{ text: 'FABRICATOR', style: 'header' }, {text: ':', style: 'header'}, { text: task.site.fabricator, style: 'header' }],
-                [{ text: 'OPERATOR',  style: 'header' }, {text: ':', style: 'header'}, { text: dataTenant,  style: 'header' }],
-                [{ text: 'SUBMIT DATE',  style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.submitedDate).format('DD-MM-YYYY'),  style: 'header' }],
-                [{ text: 'ACCEPTANCE DATE',  style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.verifiedDate).format('DD-MM-YYYY'),  style: 'header' }],
-                [{ text: 'DUE DATE', style: 'header' }, {text: ':', style: 'header'},{ text: moment(task.dueDate).format('DD-MM-YYYY'),  style: 'header' }],
-                [{ text: 'PIC NAME',  style: 'header' }, {text: ':', style: 'header'},{ text: task.makerEmployee.name,  style: 'header' }],
+                [{ text: 'SITE ID', style: 'header' }, { text: ':', style: 'header' }, { text: task.site.id, style: 'header' }],
+                [{ text: 'SITE NAME', style: 'header' }, { text: ':', style: 'header' }, { text: task.site.name, style: 'header' }],
+                [{ text: 'AREA / REGION', style: 'header' }, { text: ':', style: 'header' }, { text: task.site.region, style: 'header' }],
+                [{ text: 'TOWER HEIGHT', style: 'header' }, { text: ':', style: 'header' }, { text: task.site.towerHeight + 'M', style: 'header' }],
+                [{ text: 'FABRICATOR', style: 'header' }, { text: ':', style: 'header' }, { text: task.site.fabricator, style: 'header' }],
+                [{ text: 'OPERATOR', style: 'header' }, { text: ':', style: 'header' }, { text: dataTenant, style: 'header' }],
+                [{ text: 'SUBMIT DATE', style: 'header' }, { text: ':', style: 'header' }, { text: moment(task.submitedDate).format('DD-MM-YYYY'), style: 'header' }],
+                [{ text: 'ACCEPTANCE DATE', style: 'header' }, { text: ':', style: 'header' }, { text: moment(task.verifiedDate).format('DD-MM-YYYY'), style: 'header' }],
+                [{ text: 'DUE DATE', style: 'header' }, { text: ':', style: 'header' }, { text: moment(task.dueDate).format('DD-MM-YYYY'), style: 'header' }],
+                [{ text: 'PIC NAME', style: 'header' }, { text: ':', style: 'header' }, { text: task.makerEmployee.name, style: 'header' }],
               ]
             },
           },
-          
+
           { width: '*', text: '' },
         ]
-        
-        
+
+
       },
 
     ])
@@ -385,7 +430,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
     //         alignment : 'center',
     //         layout: 'noBorders',
     //         table : {
-              
+
     //           body : [
     //             [task.type.toLocaleLowerCase() == 'preventive' ? {
     //               alignment: 'left',
@@ -399,7 +444,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
     //                 ]
     //               },
     //               } : {
-    
+
     //               alignment: 'left',
     //               table: {
     //                 body: [
@@ -416,7 +461,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
     //       { width: '*', text: '' },
     //     ]
     //   }
-      
+
     // ])
 
 
@@ -431,7 +476,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
       if (!fs.existsSync(esign_verifikator)) esign_verifikator = null
     }
 
-    
+
     dataRender.push({
       text: '',
       pageBreak: 'after',
@@ -439,7 +484,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
 
     // dataRender.push({
     //   text: '\n\n\n\n',
-      
+
     // })
     if (task.type.toLocaleLowerCase() == 'preventive') {
       var categoryIdx = 0
@@ -448,7 +493,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
       for (let i = 0; i < categoryChecklistPreventive.length; i++) {
         const dataCategory = categoryChecklistPreventive[i];
         dataBody.push([
-          
+
           {
             text: String.fromCharCode(categoryIdx + 'A'.charCodeAt(0)),
             color: '#FFFFFF',
@@ -563,10 +608,10 @@ export class TaskService extends TypeOrmCrudService<Task>{
       }
       let tableHeader: Content = {
         alignment: 'center',
-        
-        
+
+
         table: {
-          
+
           body: [
             [{
               text: 'No',
@@ -864,10 +909,10 @@ export class TaskService extends TypeOrmCrudService<Task>{
       let head: Content = { text: groupedCategory, style: 'header', margin: [0, 30], }
       let heightImage = 180
       let widthImage = 140
-      if(groupedCategory.toLocaleLowerCase().match('panel kwh') || 
-      groupedCategory.toLocaleLowerCase().match('panel acpdb') ||
-      groupedCategory.toLocaleLowerCase().match('grounding & ')
-      ){
+      if (groupedCategory.toLocaleLowerCase().match('panel kwh') ||
+        groupedCategory.toLocaleLowerCase().match('panel acpdb') ||
+        groupedCategory.toLocaleLowerCase().match('grounding & ')
+      ) {
         heightImage = 140
         widthImage = 120
       }
@@ -884,11 +929,11 @@ export class TaskService extends TypeOrmCrudService<Task>{
         }
       })
       let assetRender = []
-      
+
       for (let j = 0; j < assets.length; j++) {
         let data = [
           {
-            
+
             stack: [
               {
                 image: path_image + assets[j].url,
@@ -929,7 +974,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
 
       let tableHeader: Content = {
         alignment: 'center',
-        
+
         table: {
           widths: ['*', '*'],
           body: [
@@ -954,7 +999,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
       pageSize: 'A4',
       content: dataRender,
       footer: function (currentPage: number, pageCount: number) {
-        if(currentPage == 1){
+        if (currentPage == 1) {
           return {
             table: {
               widths: ['*', '*'],
@@ -966,45 +1011,45 @@ export class TaskService extends TypeOrmCrudService<Task>{
               ]
             },
             layout: 'noBorders',
-            margin : [0, -150],
-            alignment : 'center'
+            margin: [0, -150],
+            alignment: 'center'
           } as Content
-        }else{
+        } else {
           return { text: task.site.id + ' - ' + currentPage.toString(), style: 'footerStyle' } as Content
         }
 
-        
+
       },
-      header : function(currentPage: number, pageCount: number){
-        if(currentPage != 1){
+      header: function (currentPage: number, pageCount: number) {
+        if (currentPage != 1) {
           return {
             alignment: 'justify',
-            columns : [
-              {  
+            columns: [
+              {
                 width: 'auto',
                 alignment: 'left',
-                margin : [30, 5],
-                
+                margin: [30, 5],
+
                 table: {
                   body: [
                     [{ text: 'SITE ID', border: [true, true, false, false], style: 'headerStyle' }, { text: task.site.id, border: [false, true, true, false], style: 'headerStyle' }],
-                    [{ text: 'SITE ADDRESS',border: [true, false, false, false], style: 'headerStyle' }, { text: task.site.address, border: [false, false, true, false], style: 'headerStyle' }],
+                    [{ text: 'SITE ADDRESS', border: [true, false, false, false], style: 'headerStyle' }, { text: task.site.address, border: [false, false, true, false], style: 'headerStyle' }],
                     [{ text: 'SITE NAME', border: [true, false, false, true], style: 'headerStyle' }, { text: task.site.name, border: [false, false, true, true], style: 'headerStyle' }],
-                    
+
                   ]
                 },
               },
-              
+
               {
                 width: '*',
                 alignment: 'right',
-                margin : [155,5,0,0],
+                margin: [155, 5, 0, 0],
                 table: {
                   body: [
-                    [{ text: 'REGION', border: [true, true, false, false],style: 'headerStyle' }, { text: task.site.region, border: [false, true, true, false],style: 'headerStyle' }],
-                    [{ text: 'TYPE', border: [true, false, false, false],style: 'headerStyle' }, { text: task.type.toUpperCase(), border: [false, false, true, false],style: 'headerStyle' }],
-                    [{ text: 'TENNANT',  border: [true, false, false, false], style: 'headerStyle' }, { text: dataTenant, border: [false, false, true, false],style: 'headerStyle' }],
-                    [{ text: 'DATE',  border: [true, false, false, true], style: 'headerStyle' }, { text: moment(task.submitedDate).format('DD-MM-YYYY'), border: [false, false, true, true],style: 'headerStyle' }],
+                    [{ text: 'REGION', border: [true, true, false, false], style: 'headerStyle' }, { text: task.site.region, border: [false, true, true, false], style: 'headerStyle' }],
+                    [{ text: 'TYPE', border: [true, false, false, false], style: 'headerStyle' }, { text: task.type.toUpperCase(), border: [false, false, true, false], style: 'headerStyle' }],
+                    [{ text: 'TENNANT', border: [true, false, false, false], style: 'headerStyle' }, { text: dataTenant, border: [false, false, true, false], style: 'headerStyle' }],
+                    [{ text: 'DATE', border: [true, false, false, true], style: 'headerStyle' }, { text: moment(task.submitedDate).format('DD-MM-YYYY'), border: [false, false, true, true], style: 'headerStyle' }],
                   ]
                 },
               }
@@ -1012,7 +1057,7 @@ export class TaskService extends TypeOrmCrudService<Task>{
           }
         }
       },
-      pageMargins: [ 40, 60, 40, 60 ],
+      pageMargins: [40, 60, 40, 60],
       styles: {
         headerTitle: {
           fontSize: 18,
