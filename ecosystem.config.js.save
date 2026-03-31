@@ -1,0 +1,31 @@
+module.exports = {
+  apps : [{
+    name : 'balcom',
+    script: "./dist/main.js",
+    instances : 1,
+    exec_mode : "cluster",
+    watch: ["dist"],
+    ignore_watch : ["node_modules"],
+    watch_options: {
+      "followSymlinks": false
+    },
+    env_production: {
+      NODE_ENV: "production"
+   },
+cd /home/project/backend-bci
+pm2 reload ecosystem.config.js
+pm2 save
+pm2 ls
+   env_development: {
+      NODE_ENV: "development"
+   }
+  }, {
+    script: './service-worker/',
+    watch: ['./service-worker']
+  },
+  
+
+],
+
+  
+};

@@ -1,27 +1,21 @@
-module.exports = {
-  apps : [{
-    name : 'balcom',
-    script: "./dist/main.js",
-    instances : "max",
-    exec_mode : "cluster",
-    watch: ["dist"],
-    ignore_watch : ["node_modules"],
-    watch_options: {
-      "followSymlinks": false
-    },
-    env_production: {
-      NODE_ENV: "production"
-   },
-   env_development: {
-      NODE_ENV: "development"
-   }
-  }, {
-    script: './service-worker/',
-    watch: ['./service-worker']
-  },
-  
+env_file: "/home/project/backend-bci/.env.production",
+    module.exports = {
+        apps: [
+            {
+                name: "balcom",
+                script: "./dist/app.module.js",
+                exec_mode: "cluster",
+                instances: 2,
+                watch: ["dist"],
+                env_file: "/home/project/backend-bci/.env.production",
+                env: {
+                    NODE_ENV: "production"
+                },
+                env_production: {
+                    NODE_ENV: "production"
+                }
+            }
+        ]
+    }
 
-],
 
-  
-};
