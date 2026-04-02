@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { TypeOrmWinstonLogger } from './logger/typeorm-logger';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { join } from 'path';
             rejectUnauthorized: false,
           },
           logging : true,
+          logger: new TypeOrmWinstonLogger(),
           synchronize: true, //should be false at production!
         }),
       }),

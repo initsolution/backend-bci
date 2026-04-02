@@ -35,13 +35,11 @@ export class CobaController {
     storage: diskStorage({
       destination: (req, file, callback) => {
         const getHeader = req.headers['x-custom-destination'] || ''
-        console.log(getHeader)
         const customDestination = './uploads/coba/' + getHeader;
         fs.mkdirsSync(customDestination)
         callback(null, customDestination);
       },
       filename: (req, file, callback) => {
-        console.log(`file name : ${file.originalname}`)
         const filename: String = uuidv4()
         //   const uniqueFileName = Date.now() + '-' + file.originalname;
         callback(null, `${filename}.jpg`);
@@ -51,7 +49,6 @@ export class CobaController {
   create(@UploadedFile() file: Express.Multer.File, @Body() dto: CreateCobaDto) {
     // return this.cobaService.create(createCobaDto);
 
-    console.log(file)
     return 'File upload success'
   }
 
@@ -100,7 +97,6 @@ export class CobaController {
   //   const job = this.schedulerRegistry.getCronJob(name);
 
   //   job.stop();
-  //   console.log(job.lastDate());
   // }
 
   @Get('getLastEndMonth')

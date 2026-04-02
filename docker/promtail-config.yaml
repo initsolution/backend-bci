@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: backend-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: backend-bci
+          env: production
+          __path__: /var/log/backend/*.log # Folder log hasil mount Docker
+
+    pipeline_stages:
+      # 1. Parse baris log sebagai JSON
+      - json:
+          expressions:
+            log_level: level
+            ctx: context
+            inst_id: instance_id
+            msg: message
+            ts: timestamp
+
+      # 2. Jadikan field tersebut sebagai Label Loki
+      # (Penting: Label inilah yang nanti muncul di filter Grafana)
+      - labels:
+          level: log_level
+          context: ctx
+          instance_id: inst_id
+
+      # 3. Gunakan timestamp asli dari log, bukan waktu Promtail membaca file
+      - timestamp:
+          source: ts
+          format: RFC3339
+
+      # 4. Opsional: Ganti tampilan pesan di Grafana supaya lebih rapi
+      # Agar yang muncul di kolom 'Message' cuma isi pesannya, bukan JSON utuh
+      - output:
+          source: msg

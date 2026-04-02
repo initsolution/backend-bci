@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { CustomFilterTaskDto } from './dto/custom-filter-task.dto';
 import { Asset } from 'src/asset/entities/asset.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import PdfPrinter from 'pdfmake';
 import { join } from 'node:path';
 import { Column, Content, TDocumentDefinitions, TDocumentInformation, TableCell } from 'pdfmake/interfaces';
@@ -33,6 +33,7 @@ export class TaskService extends TypeOrmCrudService<Task> {
   ) {
     super(repo)
   }
+  private readonly logger = new Logger(TaskService.name);
 
   async getTaskFromId(id: number) {
     return await this.repo.findOne({
@@ -131,71 +132,150 @@ export class TaskService extends TypeOrmCrudService<Task> {
     return fullTask
   }
 
+  // async getPreventiveTaskDistinct() {
+  //   const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
+  //   const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
+  //   var fullTask: Task[] = []
+  //   await this.repo.createQueryBuilder('task')
+  //     .select('task')
+  //     // .distinctOn(['task.site.id'])
+  //     .where('task.type = :type', { type: 'Preventive' })
+  //     .distinctOn(['task.site'])
+  //     .leftJoinAndSelect('task.site', 'site')
+  //     .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
+  //     .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
+
+  //     .orderBy({
+  //       'task.site': 'ASC',
+  //       'task.created_at': 'DESC',
+
+  //     })
+  //     .getMany().then((dataJadi) => {
+  //       fullTask = dataJadi
+
+  //     })
+
+  //   let data = new Map();
+  //   for (let obj of fullTask) {
+  //     data.set(obj.site.id, obj);
+  //   }
+  //   const out: Task[] = [...data.values()];
+  //   let newTaskJoin: Task[] = []
+  //   for (let index = 0; index < out.length; index++) {
+  //     const task: Task = out[index]
+  //     if (task.status == 'todo') {
+  //       let updateTask = task
+  //       updateTask.status = 'expired'
+  //       await this.repo.update(task.id, updateTask)
+  //     }
+
+  //     const submitDate = moment(task.submitedDate, "YYYY-MM-DD")
+  //     const submitDateAdd20 = submitDate.add(20, 'days')
+
+  //     const notBefore = task.submitedDate == '' ? null : submitDate.month() == submitDateAdd20.month() ? startOfMonth : submitDateAdd20.format('YYYY-MM-DD')
+
+  //     var newTask: Task = {
+  //       created_at: moment(startOfMonth).toDate(),
+  //       dueDate: endOfMonth,
+  //       submitedDate: '',
+  //       verifiedDate: '',
+  //       notBefore: notBefore,
+  //       status: 'todo',
+  //       type: task.type,
+  //       towerCategory: task.towerCategory,
+  //       makerEmployee: task.makerEmployee,
+  //       verifierEmployee: task.verifierEmployee,
+  //       site: task.site,
+  //       categorychecklistprev: [],
+  //       reportRegulerTorque: [],
+  //       reportRegulerVerticality: new Reportregulerverticality,
+  //       asset: new Asset
+  //     }
+      
+  //     newTaskJoin.push(newTask)
+  //   }
+  //   const createNewTask = this.repo.create(newTaskJoin)
+  //   return this.repo.save(createNewTask)
+  // }
+
   async getPreventiveTaskDistinct() {
-    const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
-    const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
-    var fullTask: Task[] = []
-    await this.repo.createQueryBuilder('task')
-      .select('task')
-      // .distinctOn(['task.site.id'])
-      .where('task.type = :type', { type: 'Preventive' })
-      .distinctOn(['task.site'])
-      .leftJoinAndSelect('task.site', 'site')
-      .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
-      .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
+    // synatx psql
+//     SELECT DISTINCT ON (t."siteId") 
+//     t.*, 
+//     s.*, 
+//     me.*, 
+//     ve.*
+// FROM "Task" t -- Gunakan "Task" dengan T kapital
+// LEFT JOIN "Site" s ON s."id" = t."siteId"
+// LEFT JOIN "Employee" me ON me."nik" = t."makerEmployeeNik"
+// LEFT JOIN "Employee" ve ON ve."nik" = t."verifierEmployeeNik"
+// WHERE t."type" = 'Preventive'
+// ORDER BY t."siteId" ASC, t."created_at" DESC;
 
-      .orderBy({
-        'task.site': 'ASC',
-        'task.created_at': 'DESC',
+  // 1. Ambil data awal
+  const fullTask = await this.repo.createQueryBuilder('task')
+    .leftJoinAndSelect('task.site', 'site')
+    .leftJoinAndSelect('task.makerEmployee', 'makerEmployee')
+    .leftJoinAndSelect('task.verifierEmployee', 'verifierEmployee')
+    .where('task.type = :type', { type: 'Preventive' })
+    .orderBy({ 'task.site': 'ASC', 'task.created_at': 'DESC' })
+    .getMany();
 
-      })
-      .getMany().then((dataJadi) => {
-        fullTask = dataJadi
-
-      })
-
-    let data = new Map();
-    for (let obj of fullTask) {
-      data.set(obj.site.id, obj);
-    }
-    const out: Task[] = [...data.values()];
-    let newTaskJoin: Task[] = []
-    for (let index = 0; index < out.length; index++) {
-      const task: Task = out[index]
-      if (task.status == 'todo') {
-        let updateTask = task
-        updateTask.status = 'expired'
-        await this.repo.update(task.id, updateTask)
-      }
-
-      const submitDate = moment(task.submitedDate, "YYYY-MM-DD")
-      const submitDateAdd20 = submitDate.add(20, 'days')
-
-      const notBefore = task.submitedDate == '' ? null : submitDate.month() == submitDateAdd20.month() ? startOfMonth : submitDateAdd20.format('YYYY-MM-DD')
-
-      var newTask: Task = {
-        created_at: moment(startOfMonth).toDate(),
-        dueDate: endOfMonth,
-        submitedDate: '',
-        verifiedDate: '',
-        notBefore: notBefore,
-        status: 'todo',
-        type: task.type,
-        towerCategory: task.towerCategory,
-        makerEmployee: task.makerEmployee,
-        verifierEmployee: task.verifierEmployee,
-        site: task.site,
-        categorychecklistprev: [],
-        reportRegulerTorque: [],
-        reportRegulerVerticality: new Reportregulerverticality,
-        asset: new Asset
-      }
-      // console.log(newTask)
-      newTaskJoin.push(newTask)
-    }
-    const createNewTask = this.repo.create(newTaskJoin)
-    return this.repo.save(createNewTask)
+  // 2. Filter unik per site (logika Map kamu sudah benar)
+  let dataMap = new Map();
+  for (let obj of fullTask) {
+    if (!dataMap.has(obj.site.id)) dataMap.set(obj.site.id, obj);
   }
+  const out: Task[] = [...dataMap.values()];
+
+  // --- BAGIAN OPTIMASI DIMULAI ---
+
+  // 3. Kumpulkan semua ID yang statusnya 'todo' untuk di-update masal
+  const idsToExpire = out
+    .filter(task => task.status === 'todo')
+    .map(task => task.id);
+
+  if (idsToExpire.length > 0) {
+    // Cukup 1 kali query ke database untuk update berapapun jumlah datanya
+    await this.repo.update({ id: In(idsToExpire) }, { status: 'expired' });
+    this.logger.log(`Updated ${idsToExpire.length} tasks to expired`);
+  }
+
+  // 4. Siapkan array untuk insert data baru (looping murni tanpa await)
+  const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
+  const endOfMonth = moment().endOf('month').format('YYYY-MM-DD');
+  
+  const newTaskJoin = out.map(task => {
+    const submitDate = moment(task.submitedDate, "YYYY-MM-DD");
+    const submitDateAdd20 = moment(task.submitedDate, "YYYY-MM-DD").add(20, 'days');
+
+    const notBefore = !task.submitedDate ? null : 
+                     submitDate.month() === submitDateAdd20.month() ? 
+                     startOfMonth : submitDateAdd20.format('YYYY-MM-DD');
+
+    return this.repo.create({
+      created_at: moment(startOfMonth).toDate(),
+      dueDate: endOfMonth,
+      submitedDate: '',
+      verifiedDate: '',
+      notBefore: notBefore,
+      status: 'todo',
+      type: task.type,
+      towerCategory: task.towerCategory,
+      makerEmployee: task.makerEmployee,
+      verifierEmployee: task.verifierEmployee,
+      site: task.site,
+      // Inisialisasi default jika diperlukan
+      categorychecklistprev: [],
+      reportRegulerTorque: [],
+      reportRegulerVerticality: new Reportregulerverticality(),
+      asset: new Asset()
+    });
+  });
+
+  // 5. Simpan semua task baru sekaligus
+  return this.repo.save(newTaskJoin);
+}
 
   async cobaLagi() {
     const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
@@ -294,7 +374,7 @@ export class TaskService extends TypeOrmCrudService<Task> {
         'reportRegulerVerticality',
         'reportRegulerVerticality.valueVerticality']
     })
-    // console.log(task)
+    
 
 
     let getCategoryAsset = await this.assetRepo.createQueryBuilder('asset')
@@ -307,7 +387,7 @@ export class TaskService extends TypeOrmCrudService<Task> {
     // const pathLocal = '/home/project/balcom/backend/src/task'
     const pathLocal = './assets'
     getCategoryAsset = getCategoryAsset.sort((a, b) => a.orderIndex - b.orderIndex)
-    // console.log(getCategoryAsset)
+    
     const path_fonts = join(pathLocal, 'fonts')
     const path_icon = join(pathLocal, 'image')
     const fontSize = 10
@@ -339,7 +419,7 @@ export class TaskService extends TypeOrmCrudService<Task> {
         })
       }
     }
-    // console.log(dataTenant)
+    
     let dataRender: Content
     dataRender = []
     dataRender.push(

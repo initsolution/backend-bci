@@ -19,8 +19,6 @@ export class EmployeeService extends TypeOrmCrudService<Employee> {
   }
 
   customGetMany(req: CrudRequest) {
-    console.log('service')
-    console.log(req.parsed)
     return super.getMany(req)
   }
 
@@ -52,9 +50,7 @@ export class EmployeeService extends TypeOrmCrudService<Employee> {
 
   update(nik: string, user: CreateEmployeeDto): Observable<any> {
     try {
-      console.log(user.password)
       if ( user.password != '') {
-        console.log(' password')
         return this.authService.hashPassword(user.password).pipe(
           switchMap((passwordHash: string) => {
             const newUser = new Employee
@@ -75,7 +71,6 @@ export class EmployeeService extends TypeOrmCrudService<Employee> {
           })
         )
       } else {
-        console.log(' no passworrd')
         const { password, ...result } = user
         return from(this.repo.update(nik, result)).pipe(
           switchMap(() => this.findOneUser(nik))

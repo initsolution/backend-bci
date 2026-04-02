@@ -59,17 +59,12 @@ export class EmployeeController implements CrudController<Employee> {
   // @UseGuards(JwtAuthGuard)
   @Override('updateOneBase')
   updateOne(@ParsedRequest() req: CrudRequest, @ParsedBody() dto: UpdateEmployeeDto): Observable<any> {
-    // console.log('update')
-    // console.log(dto)
-    // console.log(req.parsed.paramsFilter)
     const nik = req.parsed.paramsFilter.find(item => item.field === 'nik').value;
-    // console.log(filterId)
     return this.service.update(nik, dto)
   }
 
   @Post('doResetPassword')
   async doResetPassword(@Body() data){
-    console.log(data)
     var emp : CreateEmployeeDto ={
       nik : data.nik,
       password : data.password
@@ -96,7 +91,6 @@ export class EmployeeController implements CrudController<Employee> {
   async resetPassword(@Param('email') email: string, @Res() res : Response){
 
     const emp: Employee = await this.service.findWithEmail(email)
-    // console.log(emp)
     if(emp){
       const tokenReset = Math.floor(Math.random() * 99999999) + 1000000 +''
       var updateToken : CreateEmployeeDto = {
@@ -112,7 +106,6 @@ export class EmployeeController implements CrudController<Employee> {
       }) 
       
     }else{
-      // console.log('null')
       res.status(HttpStatus.NOT_FOUND). send({
         message: 'Email not found',
         statusCode: HttpStatus.NOT_FOUND
@@ -123,8 +116,6 @@ export class EmployeeController implements CrudController<Employee> {
     // return this.service.findUserWithEmail(email).pipe(
       
     //   map((emp: Employee) =>{
-    //     console.log(' ada')
-    //     console.log(emp)
     //     if(emp != null){
     //       return res.render('reset_password.hbs', {name : emp.name})
     //     }else{
@@ -140,8 +131,6 @@ export class EmployeeController implements CrudController<Employee> {
   @Get('custom/resetPassword/')
   @Render('reset_password.hbs')
   async customResetPassword(@Query('token') token : string, @Query('nik') nik : string ){
-    console.log(token)
-    
     // const emp: Employee = await this.service.findWithEmail(email)
     return {nik : nik, token: token}
   }
@@ -175,14 +164,11 @@ export class EmployeeController implements CrudController<Employee> {
   // @UseGuards(JwtAuthGuard)
   @Override()
   async getMany(@ParsedRequest() req: CrudRequest, @Req() reqHeader: Request) {
-    // console.log(req.parsed.filter)
-    // console.log(req.parsed)
+    
     // const jwt = reqHeader.headers.authorization
     // if(jwt != null){
     //   const jwtParsed :any = this.jwtService.decode(jwt.split(' ')[1]) 
-    //   console.log(jwtParsed.employee)
     //   if(jwtParsed.employee.role != 'SuperAdmin'){
-    //     console.log('bukan super admin')
     //     req.parsed.filter.push({
     //       field : 'role',
     //       operator : 'ne',
@@ -191,7 +177,6 @@ export class EmployeeController implements CrudController<Employee> {
     //   }
     // }
     
-    // console.log(req.parsed)
     // const results: any = await this.base.getManyBase(req);
     const results: any = await this.service.customGetMany(req);
     
@@ -223,7 +208,6 @@ export class EmployeeController implements CrudController<Employee> {
     storage: diskStorage({
       destination: './uploads/esign',
       filename: (_req, file, cb) => {
-        // console.log(file.originalname)
         const filename: String = uuidv4()
         // const filename: String = 'myapk'
         // const extention: String = extname(file.originalname)

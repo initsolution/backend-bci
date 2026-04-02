@@ -13,12 +13,12 @@ import { ValueverticalityService } from 'src/valueverticality/valueverticality.s
   model: {
     type: Reportregulerverticality
   },
-  
+
   dto: {
     create: CreateReportregulerverticalityDto,
     update: UpdateReportregulerverticalityDto
   },
-  routes :{
+  routes: {
     // exclude : ['createManyBase', 'deleteOneBase', 'replaceOneBase']
   }
 })
@@ -28,39 +28,38 @@ import { ValueverticalityService } from 'src/valueverticality/valueverticality.s
 @ApiTags('Reportregulerverticality')
 @Controller('reportregulerverticality')
 export class ReportregulerverticalityController implements CrudController<Reportregulerverticality> {
-  constructor(public service: ReportregulerverticalityService, 
+  constructor(public service: ReportregulerverticalityService,
     readonly valueVerticalityService: ValueverticalityService
-    ) {}
+  ) { }
 
   @Post('insertWithValue')
-  async insertWithPoint(@Body() dt: BulkCreateReportregulerverticalityDto){
-    // console.log(dt.bulk)
-    for(var i=0; i< dt.bulk.length; i++){
+  async insertWithPoint(@Body() dt: BulkCreateReportregulerverticalityDto) {
+
+    for (var i = 0; i < dt.bulk.length; i++) {
       var dtoCategory: CreateReportregulerverticalityDto = dt.bulk[i]
       const categoryChecklistPreventive: Reportregulerverticality = await this.service.customInsertData(dtoCategory)
-      console.log(categoryChecklistPreventive)
-      for (var j =0; j< dtoCategory.valueVerticalities.length; j++){
-        var dtoPoint : CreateValueverticalityDto = dtoCategory.valueVerticalities[j]
+
+      for (var j = 0; j < dtoCategory.valueVerticalities.length; j++) {
+        var dtoPoint: CreateValueverticalityDto = dtoCategory.valueVerticalities[j]
         dtoPoint.reportRegulerVerticality = categoryChecklistPreventive
         const pointChecklistPreventive = await this.valueVerticalityService.customInsertData(dtoPoint)
-        console.log(pointChecklistPreventive)
+
       }
     }
   }
 
   @Override()
-  async createOne(@Res() res, @ParsedRequest() req: CrudRequest, @Body() dto: CreateReportregulerverticalityDto){
-    console.log('report reguler verticality')
-    console.log(dto)
+  async createOne(@Res() res, @ParsedRequest() req: CrudRequest, @Body() dto: CreateReportregulerverticalityDto) {
+
     const categoryChecklistPreventive: Reportregulerverticality = await this.service.customInsertData(dto)
-    console.log(categoryChecklistPreventive)
-      for (var j =0; j< dto.valueVerticalities.length; j++){
-        var dtoPoint : CreateValueverticalityDto = dto.valueVerticalities[j]
-        dtoPoint.reportRegulerVerticality = categoryChecklistPreventive
-        const pointChecklistPreventive = await this.valueVerticalityService.customInsertData(dtoPoint)
-        console.log(pointChecklistPreventive)
-      }
-      // res.status()
-      res.status(HttpStatus.CREATED).send();
+
+    for (var j = 0; j < dto.valueVerticalities.length; j++) {
+      var dtoPoint: CreateValueverticalityDto = dto.valueVerticalities[j]
+      dtoPoint.reportRegulerVerticality = categoryChecklistPreventive
+      const pointChecklistPreventive = await this.valueVerticalityService.customInsertData(dtoPoint)
+
+    }
+    // res.status()
+    res.status(HttpStatus.CREATED).send();
   }
 }

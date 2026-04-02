@@ -14,12 +14,12 @@ import { PointchecklistpreventiveService } from 'src/pointchecklistpreventive/po
   model: {
     type: Categorychecklistpreventive
   },
-  
+
   dto: {
     create: CreateCategorychecklistpreventiveDto,
     update: UpdateCategorychecklistpreventiveDto
   },
-  routes :{
+  routes: {
     // exclude : ['createManyBase', 'deleteOneBase', 'replaceOneBase']
   }
 })
@@ -31,20 +31,17 @@ import { PointchecklistpreventiveService } from 'src/pointchecklistpreventive/po
 export class CategorychecklistpreventiveController implements CrudController<Categorychecklistpreventive> {
   constructor(public service: CategorychecklistpreventiveService,
     readonly pointChecklistPreventiveService: PointchecklistpreventiveService,
-    ) {}
+  ) { }
 
   @Post('insertWithPoint')
-  async insertWithPoint(@Res() res, @Body() dt: BulkCreateCategorychecklistpreventiveDto){
-    // console.log(dt.bulk)
-    for(var i=0; i< dt.bulk.length; i++){
+  async insertWithPoint(@Res() res, @Body() dt: BulkCreateCategorychecklistpreventiveDto) {
+    for (var i = 0; i < dt.bulk.length; i++) {
       var dtoCategory: CreateCategorychecklistpreventiveDto = dt.bulk[i]
       const categoryChecklistPreventive: Categorychecklistpreventive = await this.service.customInsertData(dtoCategory)
-      console.log(categoryChecklistPreventive)
-      for (var j =0; j< dtoCategory.pointChecklistPreventives.length; j++){
-        var dtoPoint : CreatePointchecklistpreventiveDto = dtoCategory.pointChecklistPreventives[j]
+      for (var j = 0; j < dtoCategory.pointChecklistPreventives.length; j++) {
+        var dtoPoint: CreatePointchecklistpreventiveDto = dtoCategory.pointChecklistPreventives[j]
         dtoPoint.categoryChecklistPreventive = categoryChecklistPreventive
         const pointChecklistPreventive = await this.pointChecklistPreventiveService.customInsertData(dtoPoint)
-        console.log(pointChecklistPreventive)
       }
     }
     res.status(HttpStatus.CREATED).send()

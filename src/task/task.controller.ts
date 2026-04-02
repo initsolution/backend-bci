@@ -20,6 +20,7 @@ import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron'
 import { ConfigService } from '@nestjs/config';
 
+
 @Crud({
   model: {
     type: Task
@@ -58,6 +59,7 @@ export class TaskController implements CrudController<Task> {
     private readonly masterReportRegulerTorqueervice: MasterreportregulertorqueService,
     private readonly assetService: AssetService,
     private configService: ConfigService,
+    private schedulerRegistry: SchedulerRegistry
   ) { }
   private readonly logger = new Logger(TaskController.name);
 
@@ -66,7 +68,7 @@ export class TaskController implements CrudController<Task> {
   @Override()
   async getMany(@ParsedRequest() req: CrudRequest) {
     // function search(searches) {
-    //   console.log(searches)
+    
     //   if (searches.$and)
     //     search(searches.$and);
     //   if (searches.$or)
@@ -92,7 +94,7 @@ export class TaskController implements CrudController<Task> {
       dtTask = dt
     })
     dtTask.sort((a,b) => a.created_at.getUTCDate() - b.created_at.getUTCDate() || a.id - b.id)
-    // console.log(dtTask)
+    
     var result = []
     for (var i = 0; i < dtTask.length; i++) {
       var task: Task = dtTask[i]
@@ -122,7 +124,7 @@ export class TaskController implements CrudController<Task> {
           var listChecklistGrounding = masterChecklist.filter((e) => e.categoryName.toLowerCase() == 'grounding & lightning protection system')
 
           var codeTenant = task.site.tenants.split(';')
-          // console.log(codeTenant.length + ' size')
+          
           var editKwh
           var editPANELACPDB
           var editGrounding
@@ -252,6 +254,34 @@ export class TaskController implements CrudController<Task> {
     return this.service.updateStatus()
   }
 
+  @Get('listcron')
+  getCrons() {
+    // Ambil semua cron jobs yang terdaftar
+    const jobs = this.schedulerRegistry.getCronJobs();
+    const result = [];
+
+    jobs.forEach((value, key) => {
+      let nextRun;
+      try {
+        // Mendapatkan jadwal lari berikutnya
+        nextRun = value.nextDate().toJSDate();
+      } catch (e) {
+        nextRun = 'Tidak ada jadwal mendatang';
+      }
+
+      result.push({
+        jobName: key,
+        nextRun: nextRun,
+        lastRun: value.lastDate() || 'Belum pernah jalan',
+        status: value.running ? 'Active/Running' : 'Stopped',
+        // Tambahkan ID Instance agar kamu tahu instance mana yang merespon API ini
+        respondedFromInstance: process.env.NODE_APP_INSTANCE || '0',
+      });
+    });
+
+    return result;
+  }
+
   @Get('customGetAll')
   async customGetAll(@Req() req: CrudRequest) {
     return await this.base.getManyBase(req);
@@ -264,7 +294,7 @@ export class TaskController implements CrudController<Task> {
 
   // @Override('updateOneBase')
   // async updateTask(@Req() req: CrudRequest, @Body() data : Task){
-  //   console.log(data)
+  
   // }
 
 
@@ -304,8 +334,7 @@ export class TaskController implements CrudController<Task> {
   //   // @Req() request: Request,
   // ) {
   //   try {
-  //     console.log(req.parsed.paramsFilter[0].value)
-  //     console.log(dto)
+  
   //     let year = Number.parseInt( dto.dueDate.split('-')[0])
   //     let month = Number.parseInt(dto.dueDate.split('-')[1])
   //     let date = Number.parseInt(dto.dueDate.split('-')[2])

@@ -80,7 +80,6 @@ export class AssetController implements CrudController<Asset> {
     storage: diskStorage({
       destination: (req, file, callback) => {
         const getHeader = req.headers['task-id'] || ''
-        // console.log(getHeader)
         const folderenv = process.env.FOLDER_DESTINATION
         const customDestination = `./uploads/assets/${folderenv}/${getHeader}`
         fs.mkdirsSync(customDestination)
@@ -139,8 +138,6 @@ export class AssetController implements CrudController<Asset> {
 
   ) {
     try {
-      // console.log(dto)
-      // return dto
       return await this.base.createManyBase(req, dto);
     } catch (err) {
       throw new HttpException(
@@ -170,7 +167,6 @@ export class AssetController implements CrudController<Asset> {
 
   @Patch('updateStatusAll')
   async updateStatusAll(@Body() data: UpdateAllAsset) {
-    // console.log(data.asset)
     if (data.asset.length > 0) {
       var acceptTotal = 0
       var taskId: number
@@ -198,7 +194,6 @@ export class AssetController implements CrudController<Asset> {
 
       }
 
-      // console.log(`task id : ${taskId} asset ok : ${acceptTotal} total asset : ${assets.length}`)
       // this.taskService.updateCustomTask(task)
       return this.taskService.updateCustomTask(task)
     } else {
@@ -210,7 +205,6 @@ export class AssetController implements CrudController<Asset> {
 
   @Patch('changeImage')
   async changeImage(@Body() dto: UpdateCycleAsset) {
-    console.log(dto)
     var sourceAsset = await this.service.getDataById(dto.idSource)
     var destination = await this.service.getDataById(dto.idDestination)
     var tempImg = sourceAsset.url
@@ -223,9 +217,7 @@ export class AssetController implements CrudController<Asset> {
 
   @Get('cobaenv/:mekdi')
   cobaenv(@Param('mekdi') mekdi : string){
-    console.log(`mekdi ${mekdi}`)
     const folderenv = this.configService.get<string>('FOLDER_DESTINATION')
-    console.log(folderenv)
     return folderenv
   }
 
@@ -238,7 +230,6 @@ export class AssetController implements CrudController<Asset> {
     storage: diskStorage({
       destination: (req, file, callback) => {
         const getHeader = req.headers['task-id'] || ''
-        // console.log(getHeader)
         const folderenv = process.env.FOLDER_DESTINATION
         const customDestination = `./uploads/assets/${folderenv}/${getHeader}`
         fs.mkdirsSync(customDestination)

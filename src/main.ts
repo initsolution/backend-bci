@@ -8,10 +8,17 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { join } from 'path';
 import * as bodyParser from 'body-parser';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './logger/winston.config';
+import { LoggingInterceptor } from './logger/logging.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: WinstonModule.createLogger(winstonConfig)
+  });
   // useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  app.useGlobalInterceptors(new LoggingInterceptor())
   const option = new DocumentBuilder()
   .setTitle(process.env.APP_NAME)
   .addBearerAuth()
